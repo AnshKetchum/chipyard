@@ -163,3 +163,7 @@
 [submodule "generators/radiance"]
 	path = generators/radiance
 	url = https://github.com/ucb-bar/radiance.git
+[submodule "generators/memorysim"]
+	path = generators/memorysim
+	url = https://github.com/AnshKetchum/memorysim.git
+	branch = integration/chipyard
