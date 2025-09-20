@@ -60,7 +60,7 @@
 	url = https://github.com/ucb-bar/shuttle.git
 [submodule "generators/testchipip"]
 	path = generators/testchipip
-	url = https://github.com/ucb-bar/testchipip.git
+	url = https://github.com/AnshKetchum/testchipip.git
 [submodule "sims/firesim"]
 	path = sims/firesim
 	url = https://github.com/firesim/firesim.git
@@ -163,3 +163,7 @@
 [submodule "generators/radiance"]
 	path = generators/radiance
 	url = https://github.com/ucb-bar/radiance.git
+[submodule "generators/memorysim"]
+	path = generators/memorysim
+	url = https://github.com/AnshKetchum/memorysim.git
+	branch = integration/chipyard

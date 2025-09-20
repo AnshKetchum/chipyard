@@ -161,7 +161,7 @@ lazy val rocketLibDeps = (rocketchip / Keys.libraryDependencies)
 // -- Chipyard-managed External Projects --
 
 lazy val testchipip = withInitCheck((project in file("generators/testchipip")), "testchipip")
-  .dependsOn(rocketchip, rocketchip_blocks)
+  .dependsOn(rocketchip, rocketchip_blocks, memorysim)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -173,7 +173,7 @@ lazy val chipyard = {
     Seq(
       testchipip, rocketchip, boom, rocketchip_blocks, rocketchip_inclusive_cache,
       icenet, tracegen,
-      constellation, barf, shuttle, rerocc,
+      constellation, barf, shuttle, rerocc, memorysim
     ).map(sbt.Project.projectToRef) ++
     (if (useChisel7) Seq() else Seq(sbt.Project.projectToRef(firrtl2_bridge))) ++
     (if (useChisel7) Seq() else Seq(sbt.Project.projectToRef(dsptools), sbt.Project.projectToRef(rocket_dsp_utils)))
@@ -303,6 +303,17 @@ lazy val boom = freshProject("boom", file("generators/boom"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
+// Added a new project
+lazy val memorysim = freshProject("memorysim", file("generators/memorysim"))
+  .dependsOn(rocketchip)
+  .settings(
+    libraryDependencies ++= rocketLibDeps.value ++ Seq(
+      "io.circe" %% "circe-core" % "0.14.7",
+      "io.circe" %% "circe-generic" % "0.14.7",
+      "io.circe" %% "circe-parser" % "0.14.7"
+    )
+  )
+  .settings(commonSettings)
 lazy val shuttle = withInitCheck((project in file("generators/shuttle")), "shuttle")
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
