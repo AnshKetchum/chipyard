@@ -303,8 +303,8 @@ lazy val boom = freshProject("boom", file("generators/boom"))
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
-// Added a new project
-lazy val memorysim = freshProject("memorysim", file("generators/memorysim"))
+// Memorysim Integration
+lazy val memorysim_core  = freshProject("memorysim-core", file("generators/memorysim/memorysim/memctrl"))
   .dependsOn(rocketchip)
   .settings(
     libraryDependencies ++= rocketLibDeps.value ++ Seq(
@@ -314,6 +314,18 @@ lazy val memorysim = freshProject("memorysim", file("generators/memorysim"))
     )
   )
   .settings(commonSettings)
+
+lazy val memorysim  = freshProject("memorysim-integration", file("generators/memorysim/memorysim/integration"))
+  .dependsOn(rocketchip, memorysim_core)
+  .settings(
+    libraryDependencies ++= rocketLibDeps.value ++ Seq(
+      "io.circe" %% "circe-core" % "0.14.7",
+      "io.circe" %% "circe-generic" % "0.14.7",
+      "io.circe" %% "circe-parser" % "0.14.7"
+    )
+  )
+  .settings(commonSettings)
+
 lazy val shuttle = withInitCheck((project in file("generators/shuttle")), "shuttle")
   .dependsOn(rocketchip)
   .settings(libraryDependencies ++= rocketLibDeps.value)
