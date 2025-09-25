@@ -129,7 +129,7 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends HarnessBinder({
     val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, memBase, port.edge.bundle, chipId)).suggestName("simdram")
 
     mem.io.clock := port.io.clock
-    mem.io.reset := th.harnessBinderReset.asAsyncReset
+    mem.io.reset := th.harnessBinderReset
     mem.io.axi <> port.io.bits
     // Bug in Chisel implementation. See https://github.com/chipsalliance/chisel3/pull/1781
     def Decoupled[T <: Data](irr: IrrevocableIO[T]): DecoupledIO[T] = {
@@ -151,6 +151,7 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends HarnessBinder({
     }
   }
 })
+
 
 class WithSimAXIMMIO extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: AXI4MMIOPort, chipId: Int) => {
