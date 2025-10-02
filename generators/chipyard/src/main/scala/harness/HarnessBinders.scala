@@ -13,7 +13,7 @@ import freechips.rocketchip.util._
 import freechips.rocketchip.jtag.{JTAGIO}
 import freechips.rocketchip.devices.debug.{SimJTAG}
 import chipyard.iocell._
-import testchipip.dram.{SimDRAM}
+import testchipip.dram.{SimDRAM, SimMemorySim}
 import testchipip.tsi.{SimTSI, SerialRAM, TSI, TSIIO}
 import testchipip.soc.{TestchipSimDTM}
 import testchipip.spi.{SimSPIFlashModel}
@@ -121,12 +121,43 @@ class WithSimAXIMem extends HarnessBinder({
 
 class WithBlackBoxSimMem(additionalLatency: Int = 0) extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: AXI4MemPort, chipId: Int) => {
-    // TODO FIX: This currently makes each SimDRAM contain the entire memory space
     val memSize = port.params.master.size
     val memBase = port.params.master.base
     val lineSize = 64 // cache block size
     val clockFreq = port.clockFreqMHz
     val mem = Module(new SimDRAM(memSize, lineSize, clockFreq, memBase, port.edge.bundle, chipId)).suggestName("simdram")
+
+    mem.io.clock := port.io.clock
+    mem.io.reset := th.harnessBinderReset
+    mem.io.axi <> port.io.bits
+    // Bug in Chisel implementation. See https://github.com/chipsalliance/chisel3/pull/1781
+    def Decoupled[T <: Data](irr: IrrevocableIO[T]): DecoupledIO[T] = {
+      require(DataMirror.directionOf(irr.bits) == Direction.Output, "Only safe to cast produced Irrevocable bits to Decoupled.")
+      val d = Wire(new DecoupledIO(chiselTypeOf(irr.bits)))
+      d.bits := irr.bits
+      d.valid := irr.valid
+      irr.ready := d.ready
+      d
+    }
+    if (additionalLatency > 0) {
+      withClock (port.io.clock) {
+        mem.io.axi.aw  <> (0 until additionalLatency).foldLeft(Decoupled(port.io.bits.aw))((t, _) => Queue(t, 1, pipe=true))
+        mem.io.axi.w   <> (0 until additionalLatency).foldLeft(Decoupled(port.io.bits.w ))((t, _) => Queue(t, 1, pipe=true))
+        port.io.bits.b <> (0 until additionalLatency).foldLeft(Decoupled(mem.io.axi.b   ))((t, _) => Queue(t, 1, pipe=true))
+        mem.io.axi.ar  <> (0 until additionalLatency).foldLeft(Decoupled(port.io.bits.ar))((t, _) => Queue(t, 1, pipe=true))
+        port.io.bits.r <> (0 until additionalLatency).foldLeft(Decoupled(mem.io.axi.r   ))((t, _) => Queue(t, 1, pipe=true))
+      }
+    }
+  }
+})
+
+class WithMemorySimMem(additionalLatency: Int = 0) extends HarnessBinder({
+  case (th: HasHarnessInstantiators, port: AXI4MemPort, chipId: Int) => {
+    val memSize = port.params.master.size
+    val memBase = port.params.master.base
+    val lineSize = 64 // cache block size
+    val clockFreq = port.clockFreqMHz
+    val mem = Module(new SimMemorySim(memSize, lineSize, clockFreq, memBase, port.edge.bundle, chipId)).suggestName("simdram")
 
     mem.io.clock := port.io.clock
     mem.io.reset := th.harnessBinderReset

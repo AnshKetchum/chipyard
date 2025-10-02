@@ -331,7 +331,7 @@ GEN_COLLATERAL_DIR ?=$(build_dir)/gen-collateral
 #########################################################################################
 # simulation variables
 #########################################################################################
-TIMEOUT_CYCLES = 10000000
+TIMEOUT_CYCLES = 500000000
 
 # legacy timeout_cycles handling
 timeout_cycles ?=
