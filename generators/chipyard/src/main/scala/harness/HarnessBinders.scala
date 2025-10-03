@@ -151,35 +151,26 @@ class WithBlackBoxSimMem(additionalLatency: Int = 0) extends HarnessBinder({
   }
 })
 
-class WithMemorySimMem(additionalLatency: Int = 0) extends HarnessBinder({
+class WithMemorySimMem(
+  nChannels: Int = 1,
+  nRanks: Int = 1,
+  nBanks: Int = 8
+) extends HarnessBinder({
   case (th: HasHarnessInstantiators, port: AXI4MemPort, chipId: Int) => {
-    val memSize = port.params.master.size
-    val memBase = port.params.master.base
-    val lineSize = 64 // cache block size
+    val memSize   = port.params.master.size
+    val memBase   = port.params.master.base
+    val lineSize  = 64 // cache block size
     val clockFreq = port.clockFreqMHz
-    val mem = Module(new SimMemorySim(memSize, lineSize, clockFreq, memBase, port.edge.bundle, chipId)).suggestName("simdram")
+
+    val mem = Module(new SimMemorySim(
+      memSize, lineSize, clockFreq, memBase,
+      port.edge.bundle, chipId,
+      nChannels, nRanks, nBanks
+    )).suggestName("simdram")
 
     mem.io.clock := port.io.clock
     mem.io.reset := th.harnessBinderReset
-    mem.io.axi <> port.io.bits
-    // Bug in Chisel implementation. See https://github.com/chipsalliance/chisel3/pull/1781
-    def Decoupled[T <: Data](irr: IrrevocableIO[T]): DecoupledIO[T] = {
-      require(DataMirror.directionOf(irr.bits) == Direction.Output, "Only safe to cast produced Irrevocable bits to Decoupled.")
-      val d = Wire(new DecoupledIO(chiselTypeOf(irr.bits)))
-      d.bits := irr.bits
-      d.valid := irr.valid
-      irr.ready := d.ready
-      d
-    }
-    if (additionalLatency > 0) {
-      withClock (port.io.clock) {
-        mem.io.axi.aw  <> (0 until additionalLatency).foldLeft(Decoupled(port.io.bits.aw))((t, _) => Queue(t, 1, pipe=true))
-        mem.io.axi.w   <> (0 until additionalLatency).foldLeft(Decoupled(port.io.bits.w ))((t, _) => Queue(t, 1, pipe=true))
-        port.io.bits.b <> (0 until additionalLatency).foldLeft(Decoupled(mem.io.axi.b   ))((t, _) => Queue(t, 1, pipe=true))
-        mem.io.axi.ar  <> (0 until additionalLatency).foldLeft(Decoupled(port.io.bits.ar))((t, _) => Queue(t, 1, pipe=true))
-        port.io.bits.r <> (0 until additionalLatency).foldLeft(Decoupled(mem.io.axi.r   ))((t, _) => Queue(t, 1, pipe=true))
-      }
-    }
+    mem.io.axi   <> port.io.bits
   }
 })
 
