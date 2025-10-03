@@ -7,6 +7,10 @@ import freechips.rocketchip.subsystem.{InCluster}
 // --------------
 // Rocket Configs
 // --------------
+class MemorySimRocketConfig extends Config(
+  new chipyard.harness.WithMemorySimMem++                     /** add MemorySim DRAM model for axi4 backing memory, if axi4 mem is enabled */
+  new freechips.rocketchip.rocket.WithNHugeCores(1) ++         // single rocket-core
+  new chipyard.config.AbstractConfig)
 
 class RocketConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++         // single rocket-core
