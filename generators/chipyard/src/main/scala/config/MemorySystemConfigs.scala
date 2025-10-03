@@ -6,9 +6,8 @@ import org.chipsalliance.cde.config.{Config}
 // Configs which demonstrate modifying the uncore memory system
 // ------------------------------------------------------------
 class MemorySimRocketConfig extends Config(
-  new chipyard.harness.WithMemorySimMem++                     // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
   new freechips.rocketchip.rocket.WithNHugeCores(1) ++
-  new chipyard.config.AbstractConfig)
+  new chipyard.config.AbstractMemorySimConfig)
 
 class SimAXIRocketConfig extends Config(
   new chipyard.harness.WithSimAXIMem ++                     // drive the master AXI4 memory with a SimAXIMem, a 1-cycle magic memory, instead of default SimDRAM
