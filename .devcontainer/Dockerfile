@@ -22,6 +22,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tmux \
     unzip \
     && rm -rf /var/lib/apt/lists/*
+
+# Install CPIO to get firemarshal running
+RUN sudo apt install cpio 
+
 # Fix locale setup - ensure it's in locale.gen first
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
     locale-gen en_US.UTF-8
