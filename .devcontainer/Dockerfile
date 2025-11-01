@@ -24,7 +24,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install CPIO to get firemarshal running
-RUN sudo apt update 
 RUN sudo apt install cpio 
 
 # Fix locale setup - ensure it's in locale.gen first
