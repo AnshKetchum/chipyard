@@ -28,6 +28,11 @@ class TinyRocketConfig extends Config(
   new freechips.rocketchip.rocket.With1TinyCore ++                // single tiny rocket-core
   new chipyard.config.AbstractConfig)
 
+class MemorySimQuadRocketConfig extends Config(
+  new chipyard.harness.WithMemorySimMem(nChannels = 2, nRanks = 2, nBanks = 8) ++ /** add MemorySim DRAM model for axi4 backing memory, if axi4 mem is enabled */
+  new freechips.rocketchip.rocket.WithNHugeCores(4) ++     // quad-core (4 RocketTiles)
+  new chipyard.config.AbstractConfig)
+
 class QuadRocketConfig extends Config(
   new freechips.rocketchip.rocket.WithNHugeCores(4) ++    // quad-core (4 RocketTiles)
   new chipyard.config.AbstractConfig)
