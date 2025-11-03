@@ -9,3 +9,9 @@ vlsi.core.drc_tool: "hammer.drc.klayout"
 # vlsi.core.drc_tool: "hammer.drc.magic"
 # LVS: Netgen
 vlsi.core.lvs_tool: "hammer.lvs.netgen"
+
+# Paths to actual tool binaries
+synthesis.yosys.yosys_bin: "/root/.conda-yosys/bin/yosys"
+par.openroad.openroad_bin: "/root/.conda-openroad/bin/openroad"
+drc.klayout.klayout_bin: "/root/.conda-klayout/bin/klayout"
+lvs.netgen.netgen_bin: "/root/.conda-signoff/bin/netgen"
