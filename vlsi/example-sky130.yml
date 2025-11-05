@@ -1,84 +1,70 @@
 # Technology Setup
-# Technology used is Sky130
 vlsi.core.technology: "hammer.technology.sky130"
+vlsi.core.max_threads: 1  # Single thread - minimal memory
 
-vlsi.core.max_threads: 12
-
-# Technology paths
 technology.sky130:
   sky130A: "/root/.conda-sky130/share/pdk/sky130A"
   sram22_sky130_macros: "/root/sram22_sky130_macros"
-
-  # this key is OPTIONAL, no NDA files will be used if it does not point to a valid path
   sky130_nda: "/path/to/skywater-src-nda"
 
-# General Hammer Inputs
-
-# Hammer will auto-generate a CPF for simple power designs; see hammer/src/hammer-vlsi/defaults.yml for more info
 vlsi.inputs.power_spec_mode: "auto"
 vlsi.inputs.power_spec_type: "cpf"
 
-# Specify clock signals
 vlsi.inputs.clocks: [
-  {name: "clock_uncore", period: "20ns", uncertainty: "1ns"}
+  {name: "clock_uncore", period: "200ns", uncertainty: "20ns"}  # Super relaxed
 ]
 
-# Generate Make include to aid in flow
 vlsi.core.build_system: make
 
-
-# Placement Constraints
 vlsi.inputs.placement_constraints:
   - path: "ChipTop"
     type: toplevel
     x: 0
     y: 0
-    width: 3588
-    height: 2992
+    width: 6000   # Even bigger
+    height: 5000
     margins:
-      left: 10.12
-      right: 10.12
-      top: 10.88
-      bottom: 10.88
-
-  # Place SRAM memory instances
-  # data cache
+      left: 50
+      right: 50
+      top: 50
+      bottom: 50
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/rockettile_dcache_data_arrays_0/rockettile_dcache_data_arrays_0_ext/mem_0_0"
     type: hardmacro
-    x: 49.68
-    y: 149.6
+    x: 200
+    y: 300
     orientation: r90
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/rockettile_dcache_data_arrays_1/rockettile_dcache_data_arrays_0_ext/mem_0_0"
     type: hardmacro
-    x: 49.68
-    y: 748
+    x: 200
+    y: 1200
     orientation: r90
-
-  # tag array
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_tag_array_0/rockettile_icache_tag_array_0_ext/mem_0_0"
     type: hardmacro
-    x: 2612.8
-    y: 1033.6
+    x: 4500
+    y: 2000
     orientation: mx90
-
-  # instruction cache
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_data_arrays_0_0/rockettile_icache_data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
-    x: 2612.8
-    y: 149.6
+    x: 4500
+    y: 300
     orientation: mx90
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_data_arrays_1_0/rockettile_icache_data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
-    x: 2612.8
-    y: 598.4
+    x: 4500
+    y: 1000
     orientation: mx90
 
-
-# Power Straps
 par.power_straps_mode: generate
 par.generate_power_straps_method: by_tracks
 par.blockage_spacing: 2.0
 par.blockage_spacing_top_layer: met3
+
+# MAXIMUM memory reduction
+par.openroad.global_placement.density: 0.98              # Nearly empty
+par.openroad.global_placement.routability_driven: false  # Disable
+par.openroad.global_placement.timing_driven: false       # Disable
+par.openroad.global_placement.skip_initial_place: false
+
 par.generate_power_straps_options:
   by_tracks:
     strap_layers:
@@ -97,14 +83,10 @@ par.generate_power_straps_options:
     power_utilization_met4: 0.1
     power_utilization_met5: 0.1
 
-
-# Pin placement constraints
 vlsi.inputs.pin_mode: generated
 vlsi.inputs.pin.generate_mode: semi_auto
 vlsi.inputs.pin.assignments: [
   {pins: "*", layers: ["met2", "met4"], side: "bottom"}
 ]
 
-
-# SRAM Compiler compiler options
 vlsi.core.sram_generator_tool: "hammer.technology.sky130.sram_compiler"
