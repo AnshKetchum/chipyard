@@ -1,69 +1,68 @@
 # Technology Setup
 vlsi.core.technology: "hammer.technology.sky130"
 vlsi.core.max_threads: 1  # Single thread - minimal memory
-
 technology.sky130:
   sky130A: "/root/.conda-sky130/share/pdk/sky130A"
   sram22_sky130_macros: "/root/sram22_sky130_macros"
   sky130_nda: "/path/to/skywater-src-nda"
-
 vlsi.inputs.power_spec_mode: "auto"
 vlsi.inputs.power_spec_type: "cpf"
-
 vlsi.inputs.clocks: [
-  {name: "clock_uncore", period: "200ns", uncertainty: "20ns"}  # Super relaxed
+  {name: "clock_uncore", period: "200ns", uncertainty: "20ns"}
 ]
-
 vlsi.core.build_system: make
 
+# Placement constraints - TRIPLED DIE SIZE for trivial congestion
 vlsi.inputs.placement_constraints:
   - path: "ChipTop"
     type: toplevel
     x: 0
     y: 0
-    width: 6000   # Even bigger
-    height: 5000
+    width: 18000   # 3x from 6000
+    height: 15000  # 3x from 5000
     margins:
-      left: 50
-      right: 50
-      top: 50
-      bottom: 50
+      left: 200
+      right: 200
+      top: 200
+      bottom: 200
+  
+  # LEFT SIDE - dcache arrays with massive spacing
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/rockettile_dcache_data_arrays_0/rockettile_dcache_data_arrays_0_ext/mem_0_0"
     type: hardmacro
-    x: 200
-    y: 300
-    orientation: r90
+    x: 1500
+    y: 2000
+    orientation: r0
+  
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/dcache/data/rockettile_dcache_data_arrays_1/rockettile_dcache_data_arrays_0_ext/mem_0_0"
     type: hardmacro
-    x: 200
-    y: 1200
-    orientation: r90
+    x: 1500
+    y: 7500
+    orientation: r0
+  
+  # RIGHT SIDE - icache arrays with massive spacing
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_tag_array_0/rockettile_icache_tag_array_0_ext/mem_0_0"
     type: hardmacro
-    x: 4500
-    y: 2000
-    orientation: mx90
+    x: 15000
+    y: 11000
+    orientation: mx
+  
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_data_arrays_0_0/rockettile_icache_data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
-    x: 4500
-    y: 300
-    orientation: mx90
+    x: 15000
+    y: 2000
+    orientation: mx
+  
   - path: "ChipTop/system/tile_prci_domain/element_reset_domain_rockettile/frontend/icache/rockettile_icache_data_arrays_1_0/rockettile_icache_data_arrays_0_0_ext/mem_0_0"
     type: hardmacro
-    x: 4500
-    y: 1000
-    orientation: mx90
+    x: 15000
+    y: 6000
+    orientation: mx
 
+# Power strap configuration - More relaxed with huge die
 par.power_straps_mode: generate
 par.generate_power_straps_method: by_tracks
 par.blockage_spacing: 2.0
 par.blockage_spacing_top_layer: met3
-
-# MAXIMUM memory reduction
-par.openroad.global_placement.density: 0.98              # Nearly empty
-par.openroad.global_placement.routability_driven: false  # Disable
-par.openroad.global_placement.timing_driven: false       # Disable
-par.openroad.global_placement.skip_initial_place: false
 
 par.generate_power_straps_options:
   by_tracks:
@@ -74,15 +73,36 @@ par.generate_power_straps_options:
       - met5
     blockage_spacing_met2: 4.0
     blockage_spacing_met4: 2.0
-    track_width: 3
+    track_width: 2
+    track_width_met4: 2
     track_width_met5: 1
-    track_spacing: 5
-    track_start: 10
-    track_start_met5: 1
-    power_utilization: 0.1
-    power_utilization_met4: 0.1
-    power_utilization_met5: 0.1
+    track_spacing: 20       # Wide spacing - plenty of room
+    track_spacing_met4: 25
+    track_start: 20
+    track_start_met4: 20
+    track_start_met5: 5
+    power_utilization: 0.02      # Ultra minimal - tons of routing space
+    power_utilization_met4: 0.02
+    power_utilization_met5: 0.02
 
+# Global placement - VERY LOW density with huge die
+par.openroad.global_placement.density: 0.40   # Extremely sparse - 40% utilization
+par.openroad.global_placement.routability_driven: true
+par.openroad.global_placement.timing_driven: false
+par.openroad.global_placement.skip_initial_place: false
+par.openroad.global_placement.pad_left: 30
+par.openroad.global_placement.pad_right: 30
+
+# Routing layers - Can use all layers comfortably now
+par.openroad.routing_layers_signal_min: "met1"
+par.openroad.routing_layers_signal_max: "met5"  # Use all layers
+par.openroad.routing_layers_clock_min: "met3"
+par.openroad.routing_layers_clock_max: "met5"
+
+# Global routing - Can afford more iterations with low density
+par.openroad.global_route_congestion_iterations: 100
+
+# Pin placement
 vlsi.inputs.pin_mode: generated
 vlsi.inputs.pin.generate_mode: semi_auto
 vlsi.inputs.pin.assignments: [
