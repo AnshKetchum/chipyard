@@ -1,11 +1,14 @@
-# exit script if not in Chipyard conda env
-if [[ `basename $CONDA_PREFIX` != .conda-env ]]; then
-    echo 'ERROR: Chipyard conda env not activated. Please source env.sh and run this script again.'
-    exit
+#!/usr/bin/env bash
+set -e  # Exit immediately if any command fails
+
+# Ensure running inside Chipyard conda environment
+if [[ $(basename "$CONDA_PREFIX") != ".conda-env" ]]; then
+    echo "ERROR: Chipyard conda env not activated. Please source env.sh and run this script again."
+    exit 1
 fi
 
 # Install GDS viewers
-pip install gdspy 
+pip install gdspy
 
 # Channel setup
 conda config --set channel_priority true
@@ -16,6 +19,11 @@ conda create -y -c litex-hub --prefix ~/.conda-sky130 open_pdks.sky130a=1.0.457_
 
 # Clone the SRAM22 Sky130 SRAM macros
 git clone https://github.com/AnshKetchum/sram22_sky130_macros ~/sram22_sky130_macros
+
+# Enter the cloned directory and run unzip.sh
+pushd ~/sram22_sky130_macros
+bash unzip.sh
+popd
 
 # Install all VLSI tools
 conda create -y -c litex-hub --prefix ~/.conda-yosys yosys=0.27_4_gb58664d44

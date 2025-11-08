@@ -79,7 +79,7 @@ dependencies:
     - sty
     # - open_pdks.sky130a
     - pip:
-        - hammer-vlsi[asap7]==1.2.0
+        - "git+https://github.com/AnshKetchum/hammer.git@cfd130c244d8f4623e4d0aeda6dea9837ec3fdb9#egg=hammer-vlsi[asap7]"
 
     # firesim python packages
     # While it is possible to install using pip after creating the
