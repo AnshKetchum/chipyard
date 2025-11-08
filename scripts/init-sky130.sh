@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -e  # Exit immediately if any command fails
 
-# Ensure running inside Chipyard conda environment
-if [[ $(basename "$CONDA_PREFIX") != ".conda-env" ]]; then
-    echo "ERROR: Chipyard conda env not activated. Please source env.sh and run this script again."
-    exit 1
-fi
-
 # Install GDS viewers
 pip install gdspy
 

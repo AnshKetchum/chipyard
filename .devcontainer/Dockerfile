@@ -40,6 +40,7 @@ RUN apt-get update && apt-get install -y \
 
 
 # Install CPIO to get firemarshal running
+RUN sudo apt update
 RUN sudo apt install cpio 
 
 # Fix locale setup - ensure it's in locale.gen first
@@ -102,7 +103,7 @@ ENV SBT_OPTS="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Dfile.encoding.pkg
 ENV _JAVA_OPTIONS="-Dfile.encoding=UTF-8"
 
 # Install Sky130 vlsi deps
-RUN chmod +x ./scripts/init-sky130.sh && source env.sh && ./scripts/init-sky130.sh
+RUN chmod +x ./scripts/init-sky130.sh && ./scripts/init-sky130.sh
 
 # Clone Hammer for any local development if need be
 RUN git clone https://github.com/AnshKetchum/hammer /workspace/hammer
