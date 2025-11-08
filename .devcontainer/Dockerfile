@@ -101,12 +101,11 @@ RUN git config --global --add safe.directory '*'
 ENV SBT_OPTS="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Dfile.encoding.pkg=UTF-8"
 ENV _JAVA_OPTIONS="-Dfile.encoding=UTF-8"
 
-# Install chipyard deps
-RUN chmod +x ./build-setup.sh && ./build-setup.sh -s 9 -s 10
-
 # Install Sky130 vlsi deps
-# RUN chmod +x ./init-sky130.sh && ./init-sky130.sh 
-# 
+RUN chmod +x ./scripts/init-sky130.sh && source env.sh && ./scripts/init-sky130.sh
+
+# Clone Hammer for any local development if need be
+RUN git clone https://github.com/AnshKetchum/hammer /workspace/hammer
 
 # ------------------------------
 # Default command
