@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     openssh-server \
     openssh-client \
+    screen \
     rsync \
     less \
     vim \
@@ -101,6 +102,9 @@ RUN git config --global --add safe.directory '*'
 # Ensure encoding environment is set for the build user too
 ENV SBT_OPTS="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Dfile.encoding.pkg=UTF-8"
 ENV _JAVA_OPTIONS="-Dfile.encoding=UTF-8"
+
+# Install Chipyard
+RUN chmod +x ./build-setup.sh && ./build-setup.sh -s 9 -s 10
 
 # Install Sky130 vlsi deps
 RUN chmod +x ./scripts/init-sky130.sh && ./scripts/init-sky130.sh
